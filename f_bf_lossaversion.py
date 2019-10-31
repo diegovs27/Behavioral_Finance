@@ -4,20 +4,31 @@
 # In[1]:
 
 
-def LossAversion(data):
+import numpy as np
+import pandas as pd
+import func_json as fj
+import f_bf_lossaversion as LA
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+def f_bf_lossaversion(data):
+    """
+    data: Base de datos con las operaciones del trader a evaluar
     
-    import numpy as np
-    import pandas as pd
-    import func_json as fj
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
+    Esta función mide en qué cantidad un trader incide en el sesgo de aversión a la pérdida
+    """
+    
+    #Definir el sesgo
+    e_explicacion = f'Loss aversion: Este sesgo consiste en contabilizar las ocasiones en las que se decide cerrar una operación, con pérdida, antes del stop loss que se había indicado.'
+    
     
     # Obtenemos la información que necesitamos para observar si hay sesgo o no
     Mov_tot = len(data) #Número de operaciones
     Tot_loss = len(data[data['Profit']<0]) #Contamos las veces que se registró una pérdida
     Loss_av = len(data[(data['Profit']<0)&(data['closePrice']>data['S/L'])]) #Operaciones con pérdida antes del S/L
     Comp = Tot_loss-Loss_av #Complemento (para la gráfica)
-    Porcentaje = (Loss_av/Tot_loss)
+    Porcentaje = round((Loss_av/Tot_loss)*100)
+    e_escala = f'El trader tiene una incidencia al sesgo del:{Porcentaje}%'
     if Porcentaje>.5:
         R = 'Si'
     else:
@@ -48,18 +59,13 @@ def LossAversion(data):
            'Incidencias al sesgo': [Loss_av],
            'Incidencias al sesgo (%)': [Porcentaje],
            '¿Actúa bajo el sesgo?': [R]}
-    res = pd.DataFrame(dic)
+    df_datos = pd.DataFrame(dic)
     
-    return {'Resultados': res,
-           'Gráficos': fig}
-
-    
-    
-    
-    
-    
-    
-    
+    return {'datos': df_datos,
+           'grafica': fig,
+           'explicacion': e_explicacion,
+           'escala': {'valor': Porcentaje,
+                      'texto': e_escala}}
 
 
 # In[ ]:
